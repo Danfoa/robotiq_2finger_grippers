@@ -1,39 +1,24 @@
 #!/usr/bin/env python
 """--------------------------------------------------------------------
-COPYRIGHT 2014 Stanley Innovation Inc.
+This Node/Script creates an instance of a `SimpleActionServer` dedicated to receive, 
+process and execute user commands for the Robotiq 2 finger adaptive grippers.
 
-Software License Agreement:
+The action type is defined in the `robotiq_2f_gripper_msgs` as `CommandRobotiqGripper.action` and
+the default action name is `/command_robotiq_action` but you can namespace it for multiple grippers
+control.
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+See the `robotiq_action_server.launch` file on this package for an example on how to call this node.
 
-1. Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
+Parameters:
+    comport: USB Communication port to which the gripper is connected to (not needed in `sim` mode).  
+    baud: Baudrate of communication with gripper (not needed in `sim` mode).
+    stroke: Maximum distance in meters, between the gripper fingers (Only 0,085 and 0.140 are currently supported)
+    joint_name: Name of the URDF gripper actuated joints to publish on the `/joint_state` topic 
+    sim: Boolean indicating whether to use a simulated gripper or try to connect to a real one.
+    rate: Frequency in Herz to update the gripper variables (command, joint_state, gripper_state)
 
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors
-may be used to endorse or promote products derived from this software without
-specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
- file   robotiq_85_driver
-
- brief  Node for Robotiq 85 communication
-
- Platform: Linux/ROS Indigo
+@author: Daniel Felipe Ordonez Apraez
+@email: daniels.ordonez@gmail.com
 --------------------------------------------------------------------"""
 import rospy
 from robotiq_2f_gripper_control.robotiq_2f_gripper_driver import Robotiq2FingerGripperDriver, Robotiq2FingerSimulatedGripperDriver 

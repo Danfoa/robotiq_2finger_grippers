@@ -12,7 +12,6 @@ FORCE_INDEX    = 12
 
 class Robotiq2FingerGripper:
     def __init__(self, device_id=0, stroke=0.085, comport='/dev/ttyUSB0',baud=115200):
-        
         try:
             self.serial_com = serial.Serial(comport, baud, timeout = 0.2)
         except IOError as error:
@@ -52,9 +51,7 @@ class Robotiq2FingerGripper:
         self.stat_cmd = [self.device_id, 0x03, 0x07, 0xD0, 0x00, 0x08]
         compute_modbus_rtu_crc(self.stat_cmd)
         self.stat_cmd_bytes = array.array('B',self.stat_cmd).tostring()
-        self._max_force = 220 # [N]  85mm gripper
-        if(self.stroke > 0.085):
-            self._max_force = 120 # [N] 140mm gripper
+        self._max_force = 100.0 # [%]
         
     def shutdown(self):
         self._shutdown_driver = True
@@ -112,7 +109,7 @@ class Robotiq2FingerGripper:
         self.rGTO = 1
         self.rPR = int(np.clip((3. - 230.)/self.stroke * pos + 230., 0, 255))
         self.rSP = int(np.clip(255./(0.1 - 0.013) * vel-0.013, 0, 255))
-        self.rFR = int(np.clip(255./(self._max_force - 5.) * force - 5., 0, 255))
+        self.rFR = int(np.clip(255./(self._max_force) * force, 0, 255))
         self._update_cmd()
         
 

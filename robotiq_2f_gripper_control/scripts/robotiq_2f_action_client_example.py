@@ -1,4 +1,14 @@
 #! /usr/bin/env python
+"""--------------------------------------------------------------------
+This Node/Script shows an example on how to use a `SimpleActionClient` instance 
+to control a Robotiq 2 Finger gripper.
+
+Parameters:
+    action_name: Name of the action advertised by the `ActionServer` controlling the gripper.
+
+@author: Daniel Felipe Ordonez Apraez
+@email: daniels.ordonez@gmail.com
+--------------------------------------------------------------------"""
 
 import rospy
 
@@ -34,7 +44,7 @@ def operate_gripper():
     # Use pre-defined functions for robot gripper manipulation.
     #####################################################################################
     while not rospy.is_shutdown():
-        Robotiq.goto(robotiq_client, pos=0.00, speed=0.01, force=100 , block=True)
+        Robotiq.goto(robotiq_client, pos=0.00, speed=0.1, force=100 , block=True)
         Robotiq.goto(robotiq_client, pos=0.04, speed=0.01, force=10)
         Robotiq.goto(robotiq_client, pos=0.011, speed=0.01, force=0 , block=True)
         Robotiq.goto(robotiq_client, pos=0.08, speed=0.11, force=200 , block=True)
