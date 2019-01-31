@@ -1,0 +1,37 @@
+<launch>
+    
+    <arg name="right_gripper_comport" default="/dev/ttyUSB0"/>
+    <arg name="left_gripper_comport" default="/dev/ttyUSB1"/>
+    <arg name="rate" default="50"/>
+    <arg name="run_test" default="True"/>
+	        
+     <!-- Launch action server for gripper -->
+    <include ns="right_gripper" file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
+        <arg name="comport" value="$(arg right_gripper_comport)"/>
+        <arg name="stroke" value="0.140"/>
+        <arg name="joint_name" value="right_gripper_finger_joint"/>
+        <arg name="verbose" value="true"/>
+    </include>
+
+    <!-- RIGHT GRIPPER CLIENT -->
+    <node ns="right_gripper" pkg="robotiq_2f_gripper_control" type="robotiq_2f_action_client_example.py" 
+        name="robotiq_85_client" output="screen" if="$(arg run_test)">
+        <param name="action_name" value="command_robotiq_action" />
+    </node>
+
+     <!-- Launch action server for gripper -->
+    <include ns="left_gripper" file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
+        <arg name="comport" value="$(arg left_gripper_comport)"/>
+        <arg name="baud" value="115200"/>
+        <arg name="stroke" value="0.085"/>
+        <arg name="joint_name" value="left_gripper_finger_joint"/>
+        <arg name="verbose" value="true"/>
+    </include>
+
+    <!-- LEFT GRIPPER CLIENT -->
+    <node ns="left_gripper" pkg="robotiq_2f_gripper_control" type="robotiq_2f_action_client_example.py" 
+        name="robotiq_85_client" output="screen" if="$(arg run_test)">
+        <param name="action_name" value="command_robotiq_action" />
+    </node>
+
+</launch>
