@@ -51,7 +51,7 @@ class CommandGripperActionServer(object):
         rospy.signal_shutdown("Gripper on port %s seems not to respond" % (self._driver._comport))
       
     def execute_cb(self, goal_command):
-        rospy.loginfo( (self._action_name + ": New goal received Pos:%.3f Speed: %.3f Force: %.3f Force-Stop: %r") % (goal_command.position, goal_command.speed, goal_command.force, goal_command.stop) )
+        rospy.logdebug( (self._action_name + ": New goal received Pos:%.3f Speed: %.3f Force: %.3f Force-Stop: %r") % (goal_command.position, goal_command.speed, goal_command.force, goal_command.stop) )
         # Send incoming command to gripper driver
         self._driver.update_gripper_command(goal_command)
         # Wait until command is received by the gripper 
