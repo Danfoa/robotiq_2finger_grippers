@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>robotiq_2f_gripper_control</name>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <description>The robotiq_2f_gripper_control package</description>
 
   <maintainer email="daniels.ordonez@gmail.com">Daniel Ordonez</maintainer>
@@ -20,10 +20,12 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-
+  
   <build_depend>actionlib</build_depend>
   <build_depend>actionlib_msgs</build_depend>
   <exec_depend>actionlib</exec_depend>
   <exec_depend>actionlib_msgs</exec_depend>
+
+  <depend>robotiq_2f_gripper_msgs</depend>
 
 </package>

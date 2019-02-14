@@ -135,7 +135,7 @@ class Robotiq2FingerGripperDriver:
             out_of_bouds = True
             cmd_corrected = 100.0
         if(out_of_bouds):
-            rospy.loginfo("Force (%.3f[%]) out of limits for %d[mm] gripper: \n- New force: %.3f[N]\n- Min force: %.3f[N]\n- Max force: %.3f[N]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0, 1.0))
+            # rospy.loginfo("Force (%.3f[%]) out of limits for %d[mm] gripper: \n- New force: %.3f[%]\n- Min force: %.3f[%]\n- Max force: %.3f[%]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0, 100))
             cmd = cmd_corrected
         return cmd
     

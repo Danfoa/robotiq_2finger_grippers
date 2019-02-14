@@ -36,7 +36,7 @@ class CommandGripperActionServer(object):
         watchdog = rospy.Timer(rospy.Duration(15.0), self._connection_timeout, oneshot=True)
         while not rospy.is_shutdown() and not self._driver.is_ready:
             rospy.sleep(0.5)
-            rospy.loginfo( self._action_name + ": Waiting for gripper to be ready...")
+            rospy.logwarn_throttle(5, self._action_name + ": Waiting for gripper to be ready...")
         
         watchdog.shutdown() 
         if not rospy.is_shutdown():
