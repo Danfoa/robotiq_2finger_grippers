@@ -109,24 +109,22 @@ Import the Action messages and actionlib library
 ```
 #include <actionlib/client/simple_action_client.h>
 #include <robotiq_2f_gripper_msgs/CommandRobotiqGripperAction.h>
+#include <robotiq_2f_gripper_control/robotiq_gripper_client.h>
 
-typedef robotiq_2f_gripper_msgs::CommandRobotiqGripperAction CommandRobotiqGripperAction;
-typedef actionlib::SimpleActionClient<CommandRobotiqGripperAction> RobotiqClient;
+typedef robotiq_2f_gripper_control::RobotiqActionClient RobotiqActionClient;
 ```
-Instantiate the action client
+Instantiate a `RobotiqActionClient` class
 ```
-RobotiqClient* gripper = new RobotiqClient("/command_robotiq_action", true);
+std::string action_name = "/command_robotiq_action";  
+bool wait_for_server = true;                  // Wait for Action Server connection (gripper is ready and activated)
+RobotiqActionClient gripper = new RobotiqActionClient(action_name, wait_for_server);
 ```
 Command your robotiq gripper
 ```
-robotiq_2f_gripper_msgs::CommandRobotiqGripperGoal gripper_cmd;
-gripper_cmd.force = 50;        //[%]
-gripper_cmd.speed = 1.0;       //[m/s]
-gripper_cmd.position = 0.04;   //[m]
-
-gripper->sendGoal( gripper_cmd );
-//or 
-gripper->sendGoalAndWait( gripper_cmd );
+gripper.close(speed, force, false);    // Close and do not wait
+gripper.close();                       // Block thread until gripper is closed.
+gripper.open();
+gripper.goToPosition( position, speed, force, true);
 ```
 ***
 ## Operation of Multiple Grippers
