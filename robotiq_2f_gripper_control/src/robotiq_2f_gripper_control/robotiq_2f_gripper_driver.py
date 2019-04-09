@@ -76,10 +76,15 @@ class Robotiq2FingerGripperDriver:
         self._comport = comport
         self._baud = baud
         self._joint_name = joint_name          
+        
 
         # Instanciate and open communication with gripper.
         self._gripper = Robotiq2FingerGripper(device_id=0, stroke=stroke, comport=self._comport, baud=self._baud)
-
+        
+        self._max_joint_limit = 0.8
+        if( self._gripper.stroke == 0.140 ):
+            self._max_joint_limit = 0.7
+        
         if not self._gripper.init_success:
             rospy.logerr("Unable to open commport to %s" % self._comport)
             return
@@ -122,7 +127,7 @@ class Robotiq2FingerGripperDriver:
             out_of_bouds = True
             cmd_corrected = 0.1
         if(out_of_bouds):
-            rospy.loginfo("Speed (%.3f[m/s]) out of limits for %d[mm] gripper: \n- New speed: %.3f[m/s]\n- Min speed: %.3f[m/s]\n- Max speed: %.3f[m/s]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0.013, 0.1))
+            rospy.logdebug("Speed (%.3f[m/s]) out of limits for %d[mm] gripper: \n- New speed: %.3f[m/s]\n- Min speed: %.3f[m/s]\n- Max speed: %.3f[m/s]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0.013, 0.1))
             cmd = cmd_corrected
         return cmd
     
@@ -237,7 +242,7 @@ class Robotiq2FingerGripperDriver:
                 rospy.logerr("Failed to contact gripper %d"% self._gripper.device_id)
             else:
                 stat = RobotiqGripperStatus()
-                js = JointState()
+                #js = JointState()
                 stat = self.get_current_gripper_status()
                 js = self._update_gripper_joint_state()
                 if stat.is_ready:
@@ -268,6 +273,20 @@ class Robotiq2FingerGripperDriver:
             js = self._update_gripper_joint_state()
             self._gripper_joint_state_pub.publish(js)
 
+    def from_distance_to_radians(self, linear_pose ):
+      """
+      Private helper function to convert a command in meters to radians (joint value)
+      """
+      return np.clip(self._max_joint_limit - ((self._max_joint_limit/self._gripper.stroke) * linear_pose), 0.0, self._max_joint_limit)
+  
+    def from_radians_to_distance(self, joint_pose):
+      """
+      Private helper function to convert a joint position in radians to meters (distance between fingers)
+      """
+      return np.clip(self._gripper.stroke - ((self._gripper.stroke/self._max_joint_limit) * joint_pose), 0.0, self._max_joint_limit)
+      
+    def get_current_joint_position(self):
+      return self.from_distance_to_radians(self._gripper.get_pos())
     ######################################################################################################
     # STATIC functions for fast control of the gripper.
 
@@ -422,7 +441,7 @@ class Robotiq2FingerSimulatedGripperDriver:
         """
         delta_time = rospy.get_time() - self._prev_time
         linear_position_goal = self._current_goal.position                                                   #[mm]
-        joint_goal = self._get_joint_position_from_m(linear_position_goal);                                #[rad]
+        joint_goal = self.from_distance_to_radians(linear_position_goal)                                     #[rad]
         position_increase = (delta_time * self._current_goal.speed) * (self._max_joint_limit/self._stroke) 
         if( abs(joint_goal - self._current_joint_pos) > position_increase ):
             self._current_joint_pos += position_increase if (joint_goal - self._current_joint_pos) > 0 else -position_increase
@@ -461,16 +480,25 @@ class Robotiq2FingerSimulatedGripperDriver:
         status.is_moving = self._is_moving
         status.obj_detected = False
         status.fault_status = False
-        status.position =  np.clip(self._stroke - ((self._stroke/self._max_joint_limit) * self._current_joint_pos), 0.0, self._max_joint_limit) #[mm]
+        status.position = self.from_radians_to_distance(self._current_joint_pos) #[mm]
         status.requested_position = self._current_goal.position                                                                                 #[mm]
         status.current = 0.0
         return status
 
-    def _get_joint_position_from_m(self, linear_pose ):
-        """
-        Private helper function to convert a command in meters to radians (joint value)
-        """
-        return np.clip(self._max_joint_limit - ((self._max_joint_limit/self._stroke) * linear_pose), 0.0, self._max_joint_limit)
+    def get_current_joint_position(self):
+      return self._current_joint_pos
+
+    def from_distance_to_radians(self, linear_pose ):
+      """
+      Private helper function to convert a command in meters to radians (joint value)
+      """
+      return np.clip(self._max_joint_limit - ((self._max_joint_limit/self._stroke) * linear_pose), 0.0, self._max_joint_limit)
+  
+    def from_radians_to_distance(self, joint_pose):
+      """
+      Private helper function to convert a joint position in radians to meters (distance between fingers)
+      """
+      return np.clip(self._stroke - ((self._stroke/self._max_joint_limit) * joint_pose), 0.0, self._max_joint_limit)
 
     def _update_gripper_joint_state(self):
         """

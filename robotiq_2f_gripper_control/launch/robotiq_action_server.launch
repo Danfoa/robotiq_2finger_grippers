@@ -1,6 +1,6 @@
 <launch>
     
-    <arg name="comport" default="/dev/ttySLAB0"                   doc="Communication port of gripper, use `dmesg | grep tty` command to list ports"/>
+    <arg name="comport" default="/dev/ttyUSB0"                   doc="Communication port of gripper, use `dmesg | grep tty` command to list ports"/>
     <arg name="baud" default="115200"/>
     <arg name="stroke" default="0.085"                            doc="Max open finger distance of gripper, it usually is 0.085m or 0.140m"/>
     <arg name="joint_name" default="finger_joint"                 doc="Full name of gripper joint in URDF robot description"/>

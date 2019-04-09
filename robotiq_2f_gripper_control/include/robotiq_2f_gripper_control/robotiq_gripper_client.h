@@ -58,8 +58,7 @@ namespace robotiq_2f_gripper_control{
 
         public:
         RobotiqActionClient(std::string action_name, bool wait_for_server = true)
-            : actionlib::SimpleActionClient<CommandRobotiqGripperAction>(action_name, true)
-            {
+            : actionlib::SimpleActionClient<CommandRobotiqGripperAction>(action_name, true){
             if( wait_for_server ){
                 waitForServer( ros::Duration(10) );
                 if( !isServerConnected() )
@@ -82,6 +81,17 @@ namespace robotiq_2f_gripper_control{
             goal.position = 255;
             goal.speed = speed;
             goal.force = force;
+            goal.emergency_release = false;
+            if( wait )
+                sendGoalAndWait( goal );
+            else
+                sendGoal( goal );
+        }
+
+        void open(bool wait){
+            goal.position = 255;
+            goal.speed = 0.01;
+            goal.force = 10;
             goal.emergency_release = false;
             if( wait )
                 sendGoalAndWait( goal );
