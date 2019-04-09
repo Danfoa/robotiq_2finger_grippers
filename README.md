@@ -75,6 +75,10 @@ This node creates an instance of an action server that will handle the gripper c
 
 #### Action type:
  [`CommandRobotiqGripper.action`](https://github.com/Danfoa/robotiq_2finger_grippers/blob/master/robotiq_2f_gripper_msgs/action/CommandRobotiqGripper.action) (see action declaration for `goal`, `feedback` and `result` message fields)
+ 
+ or 
+ 
+ [`FollowJointTrajectory.action`](http://docs.ros.org/api/control_msgs/html/action/FollowJointTrajectory.html) (see action declaration for `goal`, `feedback` and `result` message fields): This is the default control scheme from MoveIt!, meaning that with the appropiate configuration you can plan and command the gripper through the MoveIt!-Rviz GUI, and through Pick and Place operations.
 
 Note: The Action Server will only become active and ready after Robotiq gripper has been propertly initialized (see robotiq documentation).
 
