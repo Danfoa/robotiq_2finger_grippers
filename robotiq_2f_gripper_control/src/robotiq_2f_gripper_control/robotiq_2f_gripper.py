@@ -1,7 +1,11 @@
 import serial
 from serial.serialutil import SerialException
-from modbus_crc import verify_modbus_rtu_crc
-from modbus_crc import compute_modbus_rtu_crc,verify_modbus_rtu_crc
+
+from pymodbus.client.sync import ModbusSerialClient
+import robotiq_modbus_rtu.comModbusRtu
+
+from math import ceil
+
 import numpy as np
 import array
 
@@ -12,23 +16,62 @@ FORCE_INDEX    = 12
 
 class Robotiq2FingerGripper:
     def __init__(self, device_id=0, stroke=0.085, comport='/dev/ttyUSB0',baud=115200):
-        try:
-            self.serial_com = serial.Serial(comport, baud, timeout = 0.2)
-        except IOError as error:
-            self.init_success = False
-            raise IOError("Communication error with gripper %d: %s " % (device_id, error.message))
-        except:
-            self.init_success = False
+
+        self.client = robotiq_modbus_rtu.comModbusRtu.communication()
+        
+        connected = self.client.connectToDevice(device = comport)
+        if not connected:
             raise Exception("Communication with gripper %d on serial port: %s and baud rate: %d not achieved" % (device_id, comport, baud))
         
         self.init_success = True
-        self._shutdown_driver = False
         self.device_id = device_id+9
         self.stroke = stroke
         self.initialize_communication_variables()
+
+        self.message = []       
     
+    def _update_cmd(self):
+
+         #Initiate command as an empty list
+        self.message = []
+        #Build the command with each output variable
+        self.message.append(self.rACT + (self.rGTO << 3) + (self.rATR << 4))
+        self.message.append(0)
+        self.message.append(0)
+        self.message.append(self.rPR)
+        self.message.append(self.rSP)
+        self.message.append(self.rFR)   
+
+    def sendCommand(self):
+        """Send the command to the Gripper."""    
+        return self.client.sendCommand(self.message)
+
+
+    def getStatus(self):
+        """Request the status from the gripper and return it in the Robotiq2FGripper_robot_input msg type."""
+
+        #Acquire status from the Gripper
+        status = self.client.getStatus(6);
+
+        # Check if read was successful
+        if( status is None ):
+          return False
+
+        #Assign the values to their respective variables
+        self.gACT = (status[0] >> 0) & 0x01;        
+        self.gGTO = (status[0] >> 3) & 0x01;
+        self.gSTA = (status[0] >> 4) & 0x03;
+        self.gOBJ = (status[0] >> 6) & 0x03;
+        self.gFLT =  status[2]
+        self.gPR  =  status[3]
+        self.gPO  =  status[4]
+        self.gCU  =  status[5]       
+
+        return True
+        
+
     def initialize_communication_variables(self):
-        # Comunication registers
+        # Out
         self.rPR = 0
         self.rSP = 255
         self.rFR = 150
@@ -36,6 +79,7 @@ class Robotiq2FingerGripper:
         self.rATR = 0
         self.rGTO = 0
         self.rACT = 0
+        # In
         self.gSTA = 0
         self.gACT = 0
         self.gGTO = 0
@@ -44,43 +88,13 @@ class Robotiq2FingerGripper:
         self.gPO = 0
         self.gPR = 0
         self.gCU = 0
-        self.act_cmd = [0] * 0x19
-        self.act_cmd[:7] = [self.device_id, 0x10, 0x03, 0xE8, 0x00,0x08, 0x10]
-        self.act_cmd_bytes = ""
+
         self._update_cmd()
-        self.stat_cmd = [self.device_id, 0x03, 0x07, 0xD0, 0x00, 0x08]
-        compute_modbus_rtu_crc(self.stat_cmd)
-        self.stat_cmd_bytes = array.array('B',self.stat_cmd).tostring()
         self._max_force = 100.0 # [%]
         
     def shutdown(self):
-        self._shutdown_driver = True
-        self.serial_com.close()
+        self.client.close()
     
-    def process_action_cmd(self):
-        if (self._shutdown_driver):
-            return False
-        try:    
-            self.serial_com.write(self.act_cmd_bytes)
-            rsp = self.serial_com.read(8)
-            rsp = [ord(x) for x in rsp]
-            if (len(rsp) != 8):
-                return False
-            return verify_modbus_rtu_crc(rsp)
-        except:
-            return False
-        
-    def process_status_cmd(self):
-        try:
-            self.serial_com.write(self.stat_cmd_bytes)
-            rsp = self.serial_com.read(21)
-            rsp = [ord(x) for x in rsp]
-            if (len(rsp) != 21):
-                return False
-            return self.parse_rsp(rsp)
-        except:
-            return False
-
     def activate_gripper(self):
         self.rACT = 1
         self.rPR = 0
@@ -117,19 +131,6 @@ class Robotiq2FingerGripper:
         self.rACT = 1
         self.rGTO = 0
         self._update_cmd()
-        
-    def parse_rsp(self,rsp):
-        if (verify_modbus_rtu_crc(rsp)):
-            self.gACT = rsp[3] & 0x1
-            self.gGTO = (rsp[3] & 0x8) >> 3
-            self.gSTA = (rsp[3] & 0x30) >> 4
-            self.gOBJ = (rsp[3] & 0xC0) >> 6
-            self.gFLT = rsp[5] & 0x0F
-            self.gPR  = rsp[6] & 0xFF
-            self.gPO  = rsp[7] & 0xFF
-            self.gCU  = (rsp[8] & 0xFF)
-            return True
-        return False
                 
     def is_ready(self):
         return self.gSTA == 3 and self.gACT == 1
@@ -160,15 +161,4 @@ class Robotiq2FingerGripper:
     def get_current(self):
         return self.gCU * 0.1
 
-    def _update_action_req(self):
-        self._act_req = self.rACT | (self.rGTO << 3) | (self.rATR << 4) | (self.rARD << 5)
-
-    def _update_cmd(self):
-        self._update_action_req()
-        self.act_cmd = self.act_cmd[:len(self.act_cmd)-2]
-        self.act_cmd[ACTION_REQ_IDX] = self._act_req & 0x39
-        self.act_cmd[POS_INDEX] = self.rPR & 0xFF
-        self.act_cmd[SPEED_INDEX] = self.rSP & 0xFF
-        self.act_cmd[FORCE_INDEX] = self.rFR & 0xFF
-        compute_modbus_rtu_crc(self.act_cmd)
-        self.act_cmd_bytes = array.array('B',self.act_cmd).tostring()
+    

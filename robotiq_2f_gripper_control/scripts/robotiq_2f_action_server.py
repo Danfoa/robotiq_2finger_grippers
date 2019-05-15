@@ -26,6 +26,8 @@ import actionlib
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryResult, FollowJointTrajectoryFeedback, FollowJointTrajectoryGoal
 from robotiq_2f_gripper_msgs.msg import CommandRobotiqGripperFeedback, CommandRobotiqGripperResult, CommandRobotiqGripperAction, CommandRobotiqGripperGoal
 
+GOAL_DETECTION_THRESHOLD = 0.05 # Max deviation from target goal to consider as goal "reached"
+
 class CommandGripperActionServer(object):
 
     def __init__(self, namespace, action_name, driver):
@@ -87,7 +89,7 @@ class CommandGripperActionServer(object):
               self._is_stalled = True
               self._action_server.set_aborted( feedback , (self._action_name + ": fault status (gFLT) is: %d" % feedback.fault_status))
               break
-          if( abs(feedback.requested_position - feedback.position) < 0.005 or feedback.obj_detected):    # Check if position has been reached 
+          if( abs(feedback.requested_position - feedback.position) < GOAL_DETECTION_THRESHOLD or feedback.obj_detected):    # Check if position has been reached 
               watchdog.shutdown()                         # Stop timeout watchdog.
               self._processing_goal = False 
               self._is_stalled = False              
@@ -135,7 +137,7 @@ class CommandGripperActionServer(object):
 
       goal_command = CommandRobotiqGripperGoal()
       feedback.joint_names = goal.trajectory.joint_names      
-      watchdog = rospy.Timer(rospy.Duration(goal.trajectory.points[-1].time_from_start.to_sec() * 1.5), 
+      watchdog = rospy.Timer(rospy.Duration(goal.trajectory.points[-1].time_from_start.to_sec() + 0.5), 
                               self._execution_timeout, 
                               oneshot=True)
 
@@ -162,7 +164,7 @@ class CommandGripperActionServer(object):
         current_status = self._driver.get_current_gripper_status()          
         feedback.actual.positions = [self._driver.get_current_joint_position()]
         error = abs(feedback.actual.positions[0] - feedback.desired.positions[0])
-        rospy.logwarn("Error : %.3f -- Actual: %.3f -- Desired: %.3f", error, self._driver.get_current_joint_position(), feedback.desired.positions[0])           
+        rospy.logdebug("Error : %.3f -- Actual: %.3f -- Desired: %.3f", error, self._driver.get_current_joint_position(), feedback.desired.positions[0])           
 
         feedback.error.positions = [error]
         self._joint_trajectory_action_server.publish_feedback( feedback )
@@ -186,7 +188,7 @@ class CommandGripperActionServer(object):
           self._joint_trajectory_action_server.set_succeeded(result)  
           return
         # Check if current trajectory point was reached 
-        if error < 0.005 :      
+        if error < GOAL_DETECTION_THRESHOLD :      
           break
         
       # Entire trajectory was followed/reached

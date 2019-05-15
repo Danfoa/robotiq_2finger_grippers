@@ -51,6 +51,8 @@ import numpy as np
 import rospy
 from enum import Enum
 
+WATCHDOG_TIME = 1.0   # Max Time without communication with gripper allowed
+
 class Robotiq2FingerGripperDriver:
     """
     This class represents an abstraction of a gripper driver, it handles the gripper connection, initialization,
@@ -99,11 +101,12 @@ class Robotiq2FingerGripperDriver:
         self._driver_state = 0
         self.is_ready = False
         
-        if not self._gripper.process_status_cmd():
-            rospy.logerr("Failed to contact gripper %d ... ABORTING" % self._gripper.device_id)
+        if not self._gripper.getStatus():
+            rospy.logerr("Failed to contact gripper on port %s ... ABORTING" % self._comport)
             return                
                 
         self._run_driver()
+        self._last_update_time = rospy.get_time()
         
     def _clamp_position(self,cmd):
         out_of_bouds = False
@@ -114,7 +117,7 @@ class Robotiq2FingerGripperDriver:
             out_of_bouds = True
             cmd_corrected = self._gripper.stroke
         if(out_of_bouds):
-            rospy.loginfo("Position (%.3f[m]) out of limits for %d[mm] gripper: \n- New position: %.3f[m]\n- Min position: %.3f[m]\n- Max position: %.3f[m]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0.0, self._gripper.stroke))
+            rospy.logdebug("Position (%.3f[m]) out of limits for %d[mm] gripper: \n- New position: %.3f[m]\n- Min position: %.3f[m]\n- Max position: %.3f[m]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0.0, self._gripper.stroke))
             cmd = cmd_corrected
         return cmd
 
@@ -140,7 +143,7 @@ class Robotiq2FingerGripperDriver:
             out_of_bouds = True
             cmd_corrected = 100.0
         if(out_of_bouds):
-            # rospy.loginfo("Force (%.3f[%]) out of limits for %d[mm] gripper: \n- New force: %.3f[%]\n- Min force: %.3f[%]\n- Max force: %.3f[%]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0, 100))
+            # rospy.logdebug("Force (%.3f[%]) out of limits for %d[mm] gripper: \n- New force: %.3f[%]\n- Min force: %.3f[%]\n- Max force: %.3f[%]" % (cmd, self._gripper.stroke*1000, cmd_corrected, 0, 100))
             cmd = cmd_corrected
         return cmd
     
@@ -160,6 +163,7 @@ class Robotiq2FingerGripperDriver:
 
         if (True == cmd.stop):
             self._gripper.stop()
+            
         else:
             pos = self._clamp_position(cmd.position)
             vel = self._clamp_speed(cmd.speed)
@@ -236,10 +240,10 @@ class Robotiq2FingerGripperDriver:
                     self._driver_state = 2
                         
             success = True
-            success &= self._gripper.process_action_cmd()
-            success &= self._gripper.process_status_cmd()
+            success &= self._gripper.sendCommand()
+            success &= self._gripper.getStatus()
             if not success and not rospy.is_shutdown():
-                rospy.logerr("Failed to contact gripper %d"% self._gripper.device_id)
+                rospy.logerr("Failed to initialize contact with gripper %d"% self._gripper.device_id)
             else:
                 stat = RobotiqGripperStatus()
                 #js = JointState()
@@ -252,7 +256,6 @@ class Robotiq2FingerGripperDriver:
                             
             r.sleep()
 
-
     def update_driver(self):
         """
         Public function that:
@@ -263,15 +266,24 @@ class Robotiq2FingerGripperDriver:
         Raises:
             Log Error: If Modbus RTU communication with the gripper is not achieved.
         """
-        success = True
-        success &= self._gripper.process_action_cmd()
-        success &= self._gripper.process_status_cmd()
-        if not success and not rospy.is_shutdown():
-            rospy.logerr("Failed to contact gripper %d"% self._gripper.device_id)
-        else:          
+        # Try to update gripper command and status
+        success = self._gripper.sendCommand()
+        success &= self._gripper.getStatus()
+
+        # Check if communication is broken
+        update_time = rospy.get_time()
+        if success:
             js = JointState()
             js = self._update_gripper_joint_state()
             self._gripper_joint_state_pub.publish(js)
+            self._last_update_time = update_time
+        
+        # If communication failed, check if connection was truly lost
+        elif (update_time - self._last_update_time) > WATCHDOG_TIME:
+            rospy.logfatal("Failed to contact gripper on port: %s"% self._comport)
+            # self._gripper.shutdown()
+            # rospy.signal_shutdown("Communication to gripper lost")         
+            
 
     def from_distance_to_radians(self, linear_pose ):
       """
