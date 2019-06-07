@@ -200,7 +200,7 @@ class Robotiq2FingerGripperDriver:
         js.header.seq = self._seq
         js.name = [self._joint_name]
         max_joint_limit = 0.8
-        if( self._gripper.stroke == 140 ):
+        if( self._gripper.stroke == 0.140 ):
             max_joint_limit = 0.7
         pos = np.clip(max_joint_limit - ((max_joint_limit/self._gripper.stroke) * self._gripper.get_pos()), 0., max_joint_limit)
         js.position = [pos]
