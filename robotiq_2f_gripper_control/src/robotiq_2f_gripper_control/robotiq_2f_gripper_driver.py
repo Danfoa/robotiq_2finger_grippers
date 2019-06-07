@@ -431,7 +431,7 @@ class Robotiq2FingerSimulatedGripperDriver:
         _current_joint_pos: [radians] Position of the simulated joint in radians.
         _current_goal: Instance of `RobotiqGripperCommand` message holding the latest user command.
     """
-    def __init__(self, stroke=0.85, joint_name='finger_joint'):
+    def __init__(self, stroke=0.085, joint_name='finger_joint'):
         self._stroke = stroke
         self._joint_name = joint_name
         self._current_joint_pos = 0.0                                 
