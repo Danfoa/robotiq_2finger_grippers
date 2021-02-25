@@ -121,7 +121,7 @@ Instantiate a `RobotiqActionClient` class
 ```
 std::string action_name = "/command_robotiq_action";  
 bool wait_for_server = true;                  // Wait for Action Server connection (gripper is ready and activated)
-RobotiqActionClient gripper = new RobotiqActionClient(action_name, wait_for_server);
+RobotiqActionClient* gripper = new RobotiqActionClient(action_name, wait_for_server);
 ```
 Command your robotiq gripper
 ```
