@@ -25,14 +25,14 @@ from robotiq_2f_gripper_msgs.msg import CommandRobotiqGripperAction, CommandRobo
 
 class RobotiqGripperGUI(object):
 
-    SPEED_MIN, SPEED_MAX = 0.01, 0.2
-    FORCE_MIN, FORCE_MAX = 0.0, 200.0
+    SPEED_MIN, SPEED_MAX = 0.013, 0.1
+    FORCE_MIN, FORCE_MAX = 0.0, 100.0
 
     def __init__(self):
         action_name = rospy.get_param('~action_name', 'command_robotiq_action')
         self.stroke = rospy.get_param('~stroke', 0.085)
         default_speed = rospy.get_param('~default_speed', 0.1)
-        default_force = rospy.get_param('~default_force', 100.0)
+        default_force = rospy.get_param('~default_force', 50.0)
 
         self.client = actionlib.SimpleActionClient(action_name, CommandRobotiqGripperAction)
         self.server_ready = False
@@ -49,7 +49,7 @@ class RobotiqGripperGUI(object):
 
         tk.Label(self.root, text='Speed [m/s]').grid(row=0, column=0, padx=10, pady=(10, 0), sticky='w')
         tk.Scale(self.root, variable=self.speed_var, from_=self.SPEED_MIN, to=self.SPEED_MAX,
-                 resolution=0.01, orient=tk.HORIZONTAL, length=300).grid(row=1, column=0, columnspan=2, padx=10)
+                 resolution=0.001, orient=tk.HORIZONTAL, length=300).grid(row=1, column=0, columnspan=2, padx=10)
 
         tk.Label(self.root, text='Force').grid(row=2, column=0, padx=10, pady=(10, 0), sticky='w')
         tk.Scale(self.root, variable=self.force_var, from_=self.FORCE_MIN, to=self.FORCE_MAX,

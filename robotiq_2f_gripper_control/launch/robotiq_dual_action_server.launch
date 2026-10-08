@@ -27,12 +27,12 @@
      <!-- Launch action server for gripper -->
     <include ns="left_gripper" file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
         <arg name="comport" value="$(arg left_gripper_comport)" unless="$(arg sim)"/>
-        <arg name="stroke" value="$(arg right_gripper_stroke)"/>
+        <arg name="stroke" value="$(arg left_gripper_stroke)"/>
         <arg name="joint_name" value="left_gripper_finger_joint"/>
         <arg name="verbose" value="true"/>
         <arg name="sim" value="$(arg sim)"/>
         <arg name="rate" value="$(arg rate)"/>
-        <arg name="baud" value="115200"/>w
+        <arg name="baud" value="115200"/>
     </include>
 
     <!-- LEFT GRIPPER CLIENT -->

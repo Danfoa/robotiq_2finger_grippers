@@ -26,7 +26,7 @@ import actionlib
 from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryResult, FollowJointTrajectoryFeedback, FollowJointTrajectoryGoal
 from robotiq_2f_gripper_msgs.msg import CommandRobotiqGripperFeedback, CommandRobotiqGripperResult, CommandRobotiqGripperAction, CommandRobotiqGripperGoal
 
-GOAL_DETECTION_THRESHOLD = 0.05 # Max deviation from target goal to consider as goal "reached"
+GOAL_DETECTION_THRESHOLD = 0.003 # [m] Max deviation from target goal to consider as goal "reached"
 
 class CommandGripperActionServer(object):
 

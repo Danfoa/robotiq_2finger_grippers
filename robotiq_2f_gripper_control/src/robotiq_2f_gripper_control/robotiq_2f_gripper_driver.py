@@ -394,7 +394,7 @@ class Robotiq2FingerGripperDriver:
         """
         goal = CommandRobotiqGripperGoal()
         goal.emergency_release = False
-        goal.stop = False
+        goal.stop = True
 
         # Sends the goal to the gripper.
         if block:

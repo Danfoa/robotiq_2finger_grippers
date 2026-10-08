@@ -3,8 +3,8 @@
     <arg name="sim" default="false"                               doc="Whether to use a simulated gripper or not"/>
     <arg name="comport" default="/dev/ttyUSB0"                   doc="Communication port of gripper, use `dmesg | grep tty` command to list ports"/>
     <arg name="baud" default="115200"/>
-    <arg name="default_speed" default="0.1"                       doc="Initial speed slider value [m/s] (0.01 ~ 0.2)"/>
-    <arg name="default_force" default="100"                       doc="Initial force slider value (0 ~ 200)"/>
+    <arg name="default_speed" default="0.1"                       doc="Initial speed slider value [m/s] (0.013 ~ 0.1)"/>
+    <arg name="default_force" default="50"                       doc="Initial force slider value (0 ~ 100)"/>
 
     <!-- Launch action server for gripper -->
     <include file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">

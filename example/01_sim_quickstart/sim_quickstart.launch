@@ -1,0 +1,33 @@
+<!-- Simulated Robotiq 2F-85 gripper: action server + RViz. No hardware and no example client.
+     Usage: roslaunch sim_quickstart.launch [sim:=false comport:=/dev/ttyUSB0] -->
+<launch>
+    <arg name="sim" default="true" doc="Use a simulated gripper (true) or a real one (false)"/>
+    <arg name="comport" default="/dev/ttyUSB0" doc="Serial port of the real gripper (ignored when sim:=true)"/>
+    <arg name="baud" default="115200"/>
+
+    <!-- Action server: advertises /command_robotiq_action and publishes /joint_states -->
+    <include file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
+        <arg name="comport" value="$(arg comport)"/>
+        <arg name="baud" value="$(arg baud)"/>
+        <arg name="stroke" value="0.085"/>
+        <arg name="joint_name" value="finger_joint"/>
+        <arg name="verbose" value="true"/>
+        <arg name="sim" value="$(arg sim)"/>
+    </include>
+
+    <!-- Gripper model for RViz -->
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find robotiq_2f_85_gripper_visualization)/urdf/robotiq_arg2f_85_model.xacro"/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="100.0"/>
+    </node>
+
+    <node name="gripper_joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">[/joint_states]</rosparam>
+        <rosparam param="use_gui">false</rosparam>
+    </node>
+
+    <node name="rviz" pkg="rviz" type="rviz"
+          args="-d $(find robotiq_2f_85_gripper_visualization)/visualize.rviz" required="true"/>
+</launch>
