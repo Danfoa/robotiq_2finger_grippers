@@ -1,0 +1,27 @@
+<!-- Robotiq 2F-85 gripper action server + open/close GUI -->
+<launch>
+    <arg name="sim" default="false"                               doc="Whether to use a simulated gripper or not"/>
+    <arg name="comport" default="/dev/ttyUSB0"                   doc="Communication port of gripper, use `dmesg | grep tty` command to list ports"/>
+    <arg name="baud" default="115200"/>
+    <arg name="default_speed" default="0.1"                       doc="Initial speed slider value [m/s] (0.01 ~ 0.2)"/>
+    <arg name="default_force" default="100"                       doc="Initial force slider value (0 ~ 200)"/>
+
+    <!-- Launch action server for gripper -->
+    <include file="$(find robotiq_2f_gripper_control)/launch/robotiq_action_server.launch">
+        <arg name="comport" value="$(arg comport)"/>
+        <arg name="baud" value="$(arg baud)"/>
+        <arg name="stroke" value="0.085"/>
+        <arg name="joint_name" value="finger_joint"/>
+        <arg name="verbose" value="true"/>
+        <arg name="sim" value="$(arg sim)"/>
+    </include>
+
+    <!-- Open/Close GUI -->
+    <node pkg="robotiq_2f_gripper_control" type="robotiq_2f_gripper_gui.py"
+        name="robotiq_2f_gripper_gui" output="screen">
+        <param name="action_name" value="command_robotiq_action" />
+        <param name="stroke" value="0.085" />
+        <param name="default_speed" value="$(arg default_speed)" />
+        <param name="default_force" value="$(arg default_force)" />
+    </node>
+</launch>

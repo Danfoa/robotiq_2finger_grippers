@@ -2,4 +2,29 @@
 <robot name="robotiq_arg2f_85_model" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find robotiq_2f_85_gripper_visualization)/urdf/robotiq_arg2f_85_model_macro.xacro" />
   <xacro:robotiq_arg2f_85 prefix=""/>
+
+  <link name="robotiq_gripper_coupling">
+    <visual>
+      <geometry>
+        <mesh
+          filename="package://robotiq_2f_85_gripper_visualization/meshes/visual/robotiq_gripper_coupling.stl"
+          scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.13 0.13 0.13 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0065" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.018" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="gripper_base_to_coupling" type="fixed">
+    <parent link="robotiq_arg2f_base_link"/>
+    <child link="robotiq_gripper_coupling"/>
+    <origin xyz="0 0 0" rpy="0 0 3.14"/>
+  </joint>
 </robot>
