@@ -5,7 +5,7 @@ Start a simulated 2F-85 gripper and watch it in RViz. No hardware is needed.
 ## Run
 
 ```bash
-roslaunch ~/catkin_ws/src/robotiq_2finger_grippers/example/01_sim_quickstart/sim_quickstart.launch
+roslaunch robotiq_2f_gripper_examples sim_quickstart.launch
 ```
 
 The launch file starts:
@@ -37,7 +37,7 @@ rostopic echo /command_robotiq_action/feedback
 ## Use a real gripper
 
 ```bash
-roslaunch .../sim_quickstart.launch sim:=false comport:=/dev/ttyUSB0
+roslaunch robotiq_2f_gripper_examples sim_quickstart.launch sim:=false comport:=/dev/ttyUSB0
 ```
 
 ## Arguments

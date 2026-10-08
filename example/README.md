@@ -7,7 +7,7 @@ Every example works in **simulation** (`sim:=true`), so you can try them without
 
 1. Build the workspace and source it in every terminal you use:
    ```bash
-   cd ~/catkin_ws && catkin build
+   cd ~/catkin_ws && catkin build robotiq_2f_gripper_examples
    source ~/catkin_ws/devel/setup.bash
    ```
 2. For a real gripper, give your user access to the serial port (log out and in afterwards):
@@ -16,6 +16,8 @@ Every example works in **simulation** (`sim:=true`), so you can try them without
    dmesg | grep tty        # find the port, usually /dev/ttyUSB0
    ```
 
+The examples are the ROS package `robotiq_2f_gripper_examples`, so `roslaunch` and `rosrun` find them by name.
+
 ## Tutorials
 
 | # | Folder | What you learn |
@@ -23,7 +25,6 @@ Every example works in **simulation** (`sim:=true`), so you can try them without
 | 1 | [`01_sim_quickstart`](01_sim_quickstart) | Start the action server and see the gripper move in RViz |
 | 2 | [`02_python_client`](02_python_client) | Send goals from Python: raw goals, helper functions, feedback |
 | 3 | [`03_gui`](03_gui) | Open/close the gripper with a small Tkinter GUI |
-| 4 | [`04_multi_gripper`](04_multi_gripper) | Control two grippers in separate namespaces |
 
 Follow them in order. Each folder has its own README.
 

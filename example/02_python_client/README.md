@@ -1,12 +1,12 @@
 # Tutorial 2: Python action client
 
 Three scripts, from the lowest level to the most convenient. Keep the action server running
-(for example Tutorial 1) and run the scripts from a sourced terminal:
+(for example Tutorial 1) and run the scripts with `rosrun` from a sourced terminal:
 
 ```bash
-python3 01_open_close.py
-python3 02_helpers.py
-python3 03_feedback.py _position:=0.04 _speed:=0.05
+rosrun robotiq_2f_gripper_examples 01_open_close.py
+rosrun robotiq_2f_gripper_examples 02_helpers.py
+rosrun robotiq_2f_gripper_examples 03_feedback.py _position:=0.04 _speed:=0.05
 ```
 
 ## 01_open_close.py: raw goals

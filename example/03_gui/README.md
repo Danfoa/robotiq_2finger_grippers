@@ -37,5 +37,3 @@ The launch file starts the action server and the GUI together.
 
 The script is `robotiq_2f_gripper_control/scripts/robotiq_2f_gripper_gui.py`. It needs the `tkinter`
 package (`sudo apt install python3-tk`) and a display.
-
-Next: [Tutorial 4, multiple grippers](../04_multi_gripper).
