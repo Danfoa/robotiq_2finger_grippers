@@ -7,16 +7,16 @@ A small Tkinter window that sends open and close goals to the gripper.
 Simulation:
 
 ```bash
-roslaunch robotiq_2f_gripper_control robotiq_2f_85_gui.launch sim:=true
+roslaunch robotiq_2f_gripper_examples gripper_gui.launch sim:=true
 ```
 
 Real gripper:
 
 ```bash
-roslaunch robotiq_2f_gripper_control robotiq_2f_85_gui.launch comport:=/dev/ttyUSB0
+roslaunch robotiq_2f_gripper_examples gripper_gui.launch comport:=/dev/ttyUSB0
 ```
 
-The launch file starts the action server and the GUI together.
+The launch file (`example/03_gui/gripper_gui.launch`) starts the action server and the GUI together.
 
 ## Using the window
 
