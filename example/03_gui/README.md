@@ -35,5 +35,5 @@ The launch file (`example/03_gui/gripper_gui.launch`) starts the action server a
 | `default_speed` | `0.1` | Initial speed slider value [m/s] |
 | `default_force` | `50` | Initial force slider value |
 
-The script is `robotiq_2f_gripper_control/scripts/robotiq_2f_gripper_gui.py`. It needs the `tkinter`
+The script is `example/03_gui/robotiq_2f_gripper_gui.py`. It needs the `tkinter`
 package (`sudo apt install python3-tk`) and a display.

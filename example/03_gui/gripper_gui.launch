@@ -17,7 +17,7 @@
     </include>
 
     <!-- Open/Close GUI -->
-    <node pkg="robotiq_2f_gripper_control" type="robotiq_2f_gripper_gui.py"
+    <node pkg="robotiq_2f_gripper_examples" type="robotiq_2f_gripper_gui.py"
         name="robotiq_2f_gripper_gui" output="screen">
         <param name="action_name" value="command_robotiq_action" />
         <param name="stroke" value="0.085" />
